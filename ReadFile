@@ -1,0 +1,33 @@
+#include <windows.h>
+#include <iostream>
+using namespace std;
+
+
+#define BUF_SIZE 256
+
+int main(int argc, char * argv)
+{
+	LPCWSTR t = L"hello";//L是宽字符
+	HANDLE hFileRead;
+	DWORD nIn;  //想读多少
+	CHAR buffer[BUFSIZ];  //缓存字符 编码ANSI
+	
+	//读一个已经存在的文件
+	hFileRead = CreateFile(L"book.txt", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFileRead == INVALID_HANDLE_VALUE)
+	{
+		printf("error :%x\n", GetLastError());
+		return -1;
+	}
+  
+  //输出
+	while (ReadFile(hFileRead, buffer, BUF_SIZE, &nIn, NULL) && nIn > 0)
+	{
+		printf("%s\n", buffer);
+	}
+	CloseHandle(hFileRead);
+
+	system("pause");
+	return 0;
+}
+
