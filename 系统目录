@@ -1,0 +1,22 @@
+
+//获取系统目录 写入到一个文件中
+int main(int argc, char * argv)
+{
+	TCHAR szSystemDir[MAX_PATH];                      //目录最大长度 MAX_PATH 是260
+	DWORD dwWritten;                                  //实际写的长度
+	GetSystemDirectory(szSystemDir, MAX_PATH);        //得到目录
+	printf("%s\n", szSystemDir);
+	HANDLE hFile;                                     //创建文件
+	hFile = CreateFile(L"systemroot.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		if (!WriteFile(hFile, szSystemDir, lstrlen(szSystemDir), &dwWritten, NULL));
+		{
+			return GetLastError();//返回错误
+		}
+	}
+	CloseHandle(hFile);//关闭句柄
+
+	system("pause");
+	return 0;
+}
