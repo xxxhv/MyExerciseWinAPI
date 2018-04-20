@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <windows.h>
+
+DWORD ShowFileTime(PFILETIME lptime)
+{
+	//文件时间做两次转换
+	FILETIME ftLocal;  //存放转换后的本地时间
+	SYSTEMTIME st;   //存放转换后的系统时间
+	FileTimeToLocalFileTime(lptime, &ftLocal);
+	FileTimeToSystemTime(&ftLocal, &st);
+
+	printf("%d年%2d月%2d日  %#2d: %#2d: %#2d:\n",st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
+	return 0;
+}
+
+int main(int argc, char * argv)
+{
+	//文件属性 结构体
+	WIN32_FILE_ATTRIBUTE_DATA wfad;
+
+	//得到文件时间 给 wfad
+	if(!GetFileAttributesEx(L"book.txt", GetFileExInfoStandard, &wfad))
+	{
+		printf("获取文件失败\n");
+	}
+	
+	printf("创建时间：\n");
+	ShowFileTime(&wfad.ftCreationTime);
+	printf("最后访问时间：\n");
+	ShowFileTime(&wfad.ftLastAccessTime);
+	printf("最后修改时间：\n");
+	ShowFileTime(&wfad.ftLastWriteTime);
+	system("pause");
+	return 0;
+}
