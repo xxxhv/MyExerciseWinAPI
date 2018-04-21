@@ -1,0 +1,71 @@
+#include <windows.h>
+
+HINSTANCE hinst;  //实例句柄
+HWND hwnd;  //窗口句柄
+LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hPrveInstance,LPSTR lpCmdLine,int nCmdShow)
+{
+	//定义窗口类
+	WNDCLASSEX wcx;
+
+	static TCHAR szAppName[] = "OwnDraw";
+	hinst = hinstance;
+	MSG msg;//消息
+	BOOL fGotMessage;//有没有消息
+
+	//wcx.lpszClassName = "MainClass";
+	wcx.cbSize = sizeof(wcx);
+	wcx.style = CS_HREDRAW | CS_VREDRAW;   //长宽发生变化重绘
+	wcx.lpfnWndProc = MainWndProc;
+	wcx.cbClsExtra = 0;
+	wcx.cbWndExtra = 0;
+	wcx.hInstance = hinstance;
+	wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wcx.lpszMenuName = NULL;
+	wcx.lpszClassName = "MainWclass";
+	wcx.hIconSm = (HICON)LoadImage(hinstance, MAKEINTRESOURCE(5), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CXSMICON), LR_DEFAULTCOLOR);
+
+	if (!RegisterClassEx(&wcx))
+	{
+		return 1;
+	}
+
+
+	//创建窗口
+	hwnd = CreateWindow(szAppName, "hello", WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT,CW_USEDEFAULT, CW_USEDEFAULT, (HWND)NULL, (HMENU)NULL, hinstance, (LPVOID)NULL);
+	if (!hwnd)
+	{
+		return 111;
+	}
+
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+
+	while ((fGotMessage = GetMessage(&msg, (HWND)NULL, 0, 0)) != 0)
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);//消息转发
+	}
+	return msg.wParam;
+}
+
+//窗口过程函数  window消息<---->窗口过程
+LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_LBUTTONDOWN:
+		MessageBox(hwnd, "hello chuank", "hello", MB_OK);
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		//ExitThread(0);
+		return 0;
+	default:
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);//不需要的消息转给windows
+	}
+
+}
