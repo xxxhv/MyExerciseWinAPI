@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+
+int main(int argc, char * argv)
+{
+	//本地化 设置地域 <locale.h>
+	printf("Locale is %s\n", setlocale(LC_ALL, NULL));
+	setlocale(LC_ALL, "");
+	printf("Locale is %s\n", setlocale(LC_ALL, NULL));
+
+	//普通的ascII字符
+	char c = 'A';
+	printf("%c\n", c);
+	
+	//宽字符 L
+	wchar_t wc = L'是';
+	wprintf(L"%c\n", wc);
+
+	char s[] = "hello";
+	wchar_t ws[] = L"你好";//中文要用宽字符
+	printf("%s\n", s);
+	wprintf(L"%s\n", ws);
+
+	printf("%d\n", strlen(s));
+	printf("%d\n", wcslen(ws));//用宽字符
+
+	system("pause");
+	return 0;
+}
