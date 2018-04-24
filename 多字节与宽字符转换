@@ -1,0 +1,51 @@
+
+#include<stdio.h>
+#include<windows.h>
+
+
+
+int main(int argc, char * argv)
+{
+	//字符转换
+	setlocale(LC_ALL, "");
+
+	DWORD dwNum;
+	//多字节字符串转宽字符串
+	char sText[] = "多字节字符串转宽字符串";
+	dwNum = MultiByteToWideChar(CP_ACP, 0, sText, -1, NULL, 0);//转换需要多大空间
+
+	wchar_t *pwText;
+	pwText = new wchar_t[dwNum];
+	//如果动态分配失败 则结束
+	if (!pwText)
+	{
+		delete[] pwText;
+		return 1;
+	}
+	dwNum = MultiByteToWideChar(CP_ACP, 0, sText, -1, pwText, dwNum);
+	
+	wprintf(L"M->W :%s\n", pwText);
+	MessageBoxW(NULL, pwText, L"Text", MB_OK);
+	delete[] pwText;
+
+	//宽字符串转多字节字符串
+	wchar_t wTest[] = L"宽字符串转多字节字符串";
+	dwNum = WideCharToMultiByte(CP_OEMCP, 0, wTest, -1, NULL, 0, NULL, NULL);
+
+	char *psText;
+	psText = new char[dwNum];
+	//如果动态分配失败 则结束
+	if (!psText)
+	{
+		delete[] psText;
+		return 2;
+	}
+	//当前系统默认多字节用CP_OEMCP
+	dwNum = WideCharToMultiByte(CP_OEMCP, 0, wTest, -1, psText, dwNum, NULL, NULL);
+	printf("W->M :%s\n", psText);
+	delete[] psText;
+
+	system("pause");
+	return 0;
+}
+
