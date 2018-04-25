@@ -1,0 +1,67 @@
+#include<stdio.h>
+#include<windows.h>
+BOOL GetDriverInfo(LPWSTR szDrive)
+{
+	UINT uDriveType;
+	uDriveType = GetDriveType(szDrive);
+	wprintf(L"%s\n", szDrive);
+	switch (uDriveType)
+	{
+	case DRIVE_FIXED:
+		printf("这是硬盘\n");
+		break;
+	case DRIVE_CDROM:
+		printf("这是cd\n");
+		break;
+	case DRIVE_NO_ROOT_DIR:
+		printf("这是非法目录\n");
+		break;
+	case DRIVE_UNKNOWN:
+		printf("这是未知盘\n");
+		break;
+	case DRIVE_REMOVABLE:
+		printf("这个驱动器是可移动盘\n");
+		break;
+	case DRIVE_RAMDISK:
+		printf("这是闪盘（u盘）\n");
+		break; 
+	case DRIVE_REMOTE:
+		printf("这是网络共享的盘\n");
+		break; 
+	}
+
+	WCHAR szDriveName[MAX_PATH];
+	DWORD dwVolumeNumber;//硬盘序列号
+	DWORD dwMaximumCompontLength;//文件名最长
+	DWORD dwFileSystemFlage;
+	WCHAR szFileSystemNameBuffer[MAX_PATH];
+	if (!GetVolumeInformation(szDrive, szDriveName, MAX_PATH, &dwVolumeNumber, &dwMaximumCompontLength, &dwFileSystemFlage, szFileSystemNameBuffer, MAX_PATH))
+	{
+		return TRUE;
+	}
+	//如果盘有名字
+	if (0 != lstrlen(szDriveName))
+	{
+		wprintf(L"\n Drive Name is %s \n", szDriveName);
+	}
+
+	wprintf(L"\nVolume Serial Number is %u", dwVolumeNumber);
+	wprintf(L"\nMax Component Lenth is is %u", dwMaximumCompontLength);
+	wprintf(L"\nSystem Type  is %s\n", szFileSystemNameBuffer);
+
+	if (dwFileSystemFlage & FILE_VOLUME_QUOTAS)//文件系统标志
+	{
+		wprintf(L"\nThe file system supports disk quotas \n");//支持配额
+	}
+	return TRUE;
+}
+
+int main(int argc, char * argv)
+{
+	//获得驱动器属性
+	GetDriverInfo(TEXT("F:\\"));
+	
+	system("pause");
+	return 0;
+}
+
