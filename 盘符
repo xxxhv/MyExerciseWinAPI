@@ -1,0 +1,43 @@
+#include<stdio.h>
+#include<windows.h>
+#define BUFFSIZE 1024
+
+int main(int argc, char * argv)
+{
+	CHAR szLogicalDriveString[BUFFSIZE];
+	LPCWSTR szDrive;
+	ZeroMemory(szLogicalDriveString, BUFFSIZE);//清零
+
+	GetLogicalDriveStrings(BUFFSIZE-1, (LPWSTR)szLogicalDriveString);//得到逻辑驱动保存到字符串
+	//printf("%s\n", szLogicalDriveString);
+	szDrive = (LPCWSTR)szLogicalDriveString;//指针指向第一个
+	do {
+		wprintf(L"%s\n", szDrive);
+		szDrive += (lstrlen(szDrive) + 1);
+	} while (*szDrive != '\0');
+	
+	
+	
+	
+	TCHAR buf[BUFFSIZE];
+	HANDLE hVol;
+	BOOL bFlag;
+
+	hVol = FindFirstVolume(buf, BUFFSIZE);//查找盘返回给句柄hVol 赋值给buf
+	if (hVol == INVALID_HANDLE_VALUE)
+	{
+		printf("no volumes found!\n");
+		return -1;
+	}
+	wprintf(L"%s\n", buf);//C盘设备名
+	while (FindNextVolume(hVol, buf, BUFFSIZE))
+	{
+		wprintf(L"%s\n", buf);
+	}
+	bFlag = FindVolumeClose(hVol);//关闭句柄
+	
+	
+	system("pause");
+	return bFlag;
+}
+
