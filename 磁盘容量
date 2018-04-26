@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <windows.h>
+
+
+
+
+int main(int argc, char * argv)
+{
+	BOOL a;
+	//得到磁盘可用空间
+	DWORD dwTotalClusters;//总簇数
+	DWORD dwFreeClusters;//可用簇
+	DWORD dwSectPerClust;//每个簇有多少扇区
+	DWORD dwBytesPerSect;//每个扇区多少字节
+	a=GetDiskFreeSpace(TEXT("C:"), &dwSectPerClust, &dwBytesPerSect, &dwFreeClusters, &dwTotalClusters);
+	if (a)
+	{
+		printf("使用detdiskfreespace获取磁盘空间消息 \n");
+		printf("总簇数              %d\n", dwTotalClusters);
+		printf("空闲簇数            %d\n", dwFreeClusters);
+		printf("每个簇的扇区数      %d\n", dwSectPerClust);
+		printf("每个扇区的字节数    %d\n", dwBytesPerSect);
+		printf("总容量              %d\n", ((DWORD64)dwTotalClusters*(DWORD64)dwSectPerClust*(DWORD64)dwBytesPerSect));	
+		printf("空闲容量            %d\n", ((DWORD64)dwFreeClusters*(DWORD64)dwSectPerClust*(DWORD64)dwBytesPerSect));
+	}
+
+	printf("\n\n");
+	INT bResult;
+	DWORD64 qwFreeBytes, qwFreeBytesToCaller, qwTotalBytes;
+	bResult = GetDiskFreeSpaceEx(TEXT("C:"), (PULARGE_INTEGER)&qwFreeBytesToCaller, (PULARGE_INTEGER)&qwTotalBytes, (PULARGE_INTEGER)&qwFreeBytes);
+	if (bResult)
+	{
+		printf("使用detdiskfreespaceex获取磁盘空间消息 \n");
+		printf("总容量              %d\n", qwTotalBytes);
+		printf("可用容量            %d\n", qwFreeBytes);
+		printf("空闲容量            %d\n", qwFreeBytesToCaller);
+	}
+	system("pause");
+	return 0;
+}
+
