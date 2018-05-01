@@ -1,0 +1,113 @@
+
+#include <stdio.h>
+#include <windows.h>
+
+
+
+
+
+DWORD showFileTime(PFILETIME lptime)
+{
+	FILETIME ftlocal;//本地时间
+	SYSTEMTIME ftsystem;//系统时间
+	FileTimeToLocalFileTime(lptime, &ftlocal);
+	FileTimeToSystemTime(&ftlocal, &ftsystem);
+	printf("%4d 年 %2d 月 %2d 日 , %2d %2d %2d\n",
+		ftsystem.wYear, ftsystem.wMonth, ftsystem.wDay, ftsystem.wHour, ftsystem.wMinute, ftsystem.wSecond);
+	return 0;
+}
+DWORD showFileSize(DWORD high, DWORD low)
+{
+	//用来把高低位加起来
+	ULONGLONG liFileSize;
+	liFileSize = high;
+	liFileSize <<= 32;//左移32位
+	liFileSize += low;
+	printf("文件大小 :\n");
+	printf("%I64u k\n", liFileSize);
+	return 0;
+}
+
+DWORD showFileAttrInfo(DWORD dwAttribute)
+{
+	printf("文件属性 \n");
+	if (dwAttribute&FILE_ATTRIBUTE_ARCHIVE)
+	{
+		printf("<ARCHIVE > ");//归档
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_COMPRESSED)
+	{
+		printf("<压缩 > ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_READONLY)
+	{
+		printf("<只读 > ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_ENCRYPTED)
+	{
+		printf("<加密 > ");//
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_HIDDEN)
+	{
+		printf("<影藏 > ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_NORMAL)
+	{
+		printf("<normal > ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_OFFLINE)
+	{
+		printf("<离线> ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_SYSTEM)
+	{
+		printf("<system > ");
+	}
+	if (dwAttribute&FILE_ATTRIBUTE_TEMPORARY)
+	{
+		printf("<临时文件 > ");
+	}
+	return 0;
+}
+
+DWORD showFileAttributer(LPTSTR szPath)
+{
+	WIN32_FILE_ATTRIBUTE_DATA wfad;
+
+	wprintf(L"文件 : %s\n", szPath);
+	
+	if (!GetFileAttributesEx(szPath, GetFileExInfoStandard, &wfad))
+	{
+		printf("error %d", GetLastError);
+		return 1;
+	}
+	printf("创建时间 \n");
+	showFileTime(&wfad.ftCreationTime);
+	printf("最后访问时间 \n");
+	showFileTime(&wfad.ftLastAccessTime);
+	printf("修改时间 \n");
+	showFileTime(&wfad.ftLastWriteTime);
+	
+	showFileSize(wfad.nFileSizeHigh, wfad.nFileSizeLow);
+	
+	showFileAttrInfo(wfad.dwFileAttributes);
+	return 0;
+}
+
+
+int main(int argc, LPTSTR argv[])
+{
+	//GetFileAttributes      得到文件属性
+	//SetFileAttributes	     设置文件属性
+	//FileTimeToLocalFileTime
+	//FileTimeToSystemTime
+	//WIN32_FILE_ATTRIBUTE_DATA 文件属性数据结构
+	//FILETIME
+	//SYSTEMTIME
+
+	showFileAttributer(TEXT("F:\\cf\\un\\we2\\we2\\t1.dat"));
+
+	system("pause");
+	return 0;
+}
+
