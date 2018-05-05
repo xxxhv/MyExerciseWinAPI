@@ -1,0 +1,38 @@
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main(int argc, LPTSTR argv[])
+{
+	TCHAR szSystemD[MAX_PATH];
+	TCHAR szWindowsD[MAX_PATH];
+	GetSystemDirectory(szSystemD, MAX_PATH);
+	GetWindowsDirectory(szWindowsD, MAX_PATH);
+	wprintf(L"system directory:\t%s\n", szSystemD);
+	wprintf(L"windows directory:\t%s\n", szWindowsD);
+
+	DWORD dwCPnameLen = MAX_COMPUTERNAME_LENGTH + 1;
+	TCHAR szCPname[MAX_COMPUTERNAME_LENGTH + 1];
+	GetComputerName(szCPname, &dwCPnameLen);
+	wprintf(L"computer name:\t%s\n", szCPname);
+
+
+	TCHAR szUsername[64];
+	DWORD szUserLen = 64;
+	GetUserName(szUsername, &szUserLen);
+	wprintf(L"user name:\t%s\n", szUsername);
+
+	BOOL fResult;//保存函数调用的结果
+	int aMouseInfo[3];
+
+	fResult = SystemParametersInfo(SPI_GETMOUSE, 0, &aMouseInfo, 0);//获取外设 SPI外设
+	if (fResult)
+	{
+		aMouseInfo[2] = 2*aMouseInfo[2];
+		SystemParametersInfo(SPI_SETMOUSE, 0, aMouseInfo, SPIF_SENDCHANGE);
+	}
+
+	system("pause");
+	return 0;
+}
