@@ -1,7 +1,7 @@
 
 #include <windows.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 #define L 100000
 int cmp(const void *a, const void *b)
 {
