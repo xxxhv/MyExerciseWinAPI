@@ -1,0 +1,37 @@
+
+#include <windows.h>
+#include <stdio.h>
+
+#define L 100000
+int cmp(const void *a, const void *b)
+{
+	return *(int *)a - *(int *)b;
+}
+
+int main()
+{
+	SYSTEMTIME st;
+	GetLocalTime(&st);//获取时间SetLocalTime(&st) 设置
+	printf("Now %d %d %d-%d %d %d \n",
+		st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+
+	DWORD c1 = GetTickCount();//得到持续时间DWORD 是32位最大值42亿 42亿毫秒=几十个小时
+	ULONGLONG c2 = GetTickCount64();//这个64位
+	printf("%d \n", c1);
+	printf("%d \n", c2);
+	//srand(GetTickCount());可以用来初始随机数种子
+
+	
+	int nums[L];
+	srand(GetTickCount());
+	for (int i = 0; i < L; i++)
+	{
+		nums[i] = rand() % 1000;
+	}
+	int startTime = GetTickCount();
+	qsort(nums, L, sizeof(nums[0]), cmp);
+	int endTime = GetTickCount();
+	printf("十万个数排序用时 %d\n", endTime - startTime);
+	system("pause");
+	return 0;
+}
