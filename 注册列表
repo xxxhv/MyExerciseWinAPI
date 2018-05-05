@@ -1,0 +1,63 @@
+#include<stdio.h>
+#include<windows.h>
+#include<stdlib.h>
+
+int main()
+{
+	//注册列表regedit 树状数据库
+	//key > subkey > value 名称 类型 数据
+
+	//read
+	long lRet;
+	HKEY hKey;
+	TCHAR tData[64];
+	DWORD size;
+
+	size = sizeof(tData);
+	lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), 0, KEY_QUERY_VALUE, &hKey);
+	if (lRet == ERROR_SUCCESS)
+	{
+		lRet = RegQueryValueEx(hKey, _T("ProcessorNameString"), NULL, NULL, (LPBYTE)tData, &size);
+		if (lRet == ERROR_SUCCESS)
+		{
+			wprintf(L"%s\n", tData);
+		}
+		else
+		{
+			printf("error\n");
+		}
+	}
+	else
+	{
+		printf("error\n");
+	}
+	RegCloseKey(hKey);
+
+	//write
+	//要以管理员身份运行
+	HKEY hKey2;
+	int a;
+	a = RegCreateKey(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\MyAppTest"), &hKey2);
+	if (a == 0)
+	{
+		printf("success");
+		RegSetValue(hKey2, NULL, REG_SZ, _T("xx"), 2);
+		DWORD dwA = 30;
+		RegSetValueEx(hKey2, _T("abc"), 0, REG_DWORD, (CONST BYTE*)&dwA, 4);
+		printf("ok\n");
+	}
+	
+	RegCloseKey(hKey2);
+	
+
+	LONG lValue;
+	RegQueryValue(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\MyAppTest"), NULL, &lValue);
+	TCHAR *pBuf = new TCHAR[lValue];
+	RegQueryValue(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\MyAppTest"), pBuf, &lValue);
+	wprintf(L"%s\n", pBuf);
+
+	system("pause");
+	return 0;
+}
+
+
