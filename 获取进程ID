@@ -1,0 +1,67 @@
+#include <iostream>
+#include <windows.h>
+#include <winternl.h>
+using namespace std;
+
+
+typedef NTSTATUS(NTAPI* QEURYINFORMATIONPROCESS)(
+	IN HANDLE ProcessHandle,
+	IN PROCESSINFOCLASS ProcessInformationClass,
+	OUT PVOID ProcessInformation,
+	IN ULONG ProcessInfortionLength,
+	OUT PULONG ReturnLength OPTIONAL
+	);
+	
+
+
+int main(int argc, LPTSTR argv[])
+{
+	
+	STARTUPINFO startupInfo = { 0 };
+	PROCESS_INFORMATION processInfoemation = { 0 };
+
+	BOOL bSuccess = CreateProcess(TEXT("C:\\Windows\\notepad.exe"), NULL, NULL, NULL, FALSE, NULL, NULL, NULL, &startupInfo, &processInfoemation);
+	if (bSuccess)
+	{
+		cout << "Process Started " << endl << "Process ID " << processInfoemation.dwProcessId << endl;
+
+		PROCESS_BASIC_INFORMATION pbi;
+		ULONG uLength = 0;
+
+		HMODULE hDll = LoadLibrary(TEXT("C:\\Windows\\System32\\ntdll.dll"));
+
+		if (hDll)
+		{
+			QEURYINFORMATIONPROCESS QueryInformationProcess = (QEURYINFORMATIONPROCESS)GetProcAddress(hDll, "NtQueryInformationProcess");
+			if (QueryInformationProcess)
+			{
+				NTSTATUS ntStatus = QueryInformationProcess(processInfoemation.hProcess, PROCESSINFOCLASS::ProcessBasicInformation, &pbi, sizeof(pbi), &uLength);
+				if (NT_SUCCESS(ntStatus))
+				{
+					cout << "Process ID (from PCB):\t" << pbi.UniqueProcessId << endl;
+				}
+				else
+				{
+					cout << "Cannot open PCB!" << endl << "Error Code :" << GetLastError() << endl;
+				}
+			}
+			else
+			{
+				cout << "Cannot get " << "NtQueryInfoProcess function!" << endl << "Error Code :" << GetLastError() << endl;
+			}
+			FreeLibrary(hDll);
+		}
+		else
+		{
+			cout << "Cannot load ntdll.dll!" << endl << "Error Code :" << GetLastError() << endl;
+		}
+	}
+	else
+	{
+		cout << "Cannot start process!" << endl << "Error Code :" << GetLastError() << endl;
+	}
+	system("pause");
+	return 0;
+}
+
+
