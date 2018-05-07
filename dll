@@ -1,0 +1,49 @@
+typedef DWORD(*DEMOW)();//定义函数指针
+
+HINSTANCE hLib;
+hLib = LoadLibrary(TEXT("abc.dll"));//加载dll
+DEMOW DemoW = (DEMOW)GetProcAddress(hLib, TEXT("DemoW"));//使用dll函数
+
+//cpp
+//ASCII版本
+//extern "C"//c++调用 __declspec(dllexport) 声明导出函数 CALLBACK
+EXPORT BOOL CALLBACK ddrCenterTextA(HDC hdc, PRECT prc, PCSTR pString)
+{
+	int ilength;
+	SIZE size;
+	ilength = lstrlenA(pString);
+	GetTextExtentPoint32A(hdc, pString, ilength, &size);
+	return TextOutA(hdc, (prc->right - prc->left - size.cx) / 2,
+		(prc->bottom - prc->top - size.cy) / 2, pString, ilength);
+}
+//宽字符版本
+EXPORT BOOL CALLBACK ddrCenterTextW(HDC hdc, PRECT prc, PCWSTR pString)
+{
+	int ilength;
+	SIZE size;
+	ilength = lstrlenW(pString);
+	GetTextExtentPoint32W(hdc, pString, ilength, &size);
+	return TextOutW(hdc, (prc->right - prc->left - size.cx) / 2,
+		(prc->bottom - prc->top - size.cy) / 2, pString, ilength);
+}
+
+
+//h
+
+//判断是不是c++
+//EXPORT 有不同的定义
+#ifndef __cplusplus
+#define EXPORT extern "C" __declspec (dllexport)
+#else
+#define EXPORT __declspec (dllexport)
+#endif
+
+
+EXPORT BOOL CALLBACK ddrCenterTextA(HDC hdc, PRECT prc, PCSTR pString);
+EXPORT BOOL CALLBACK ddrCenterTextW(HDC hdc, PRECT prc, PCWSTR pString);
+
+#ifdef UNICODE
+#define ddrCenterText ddrCenterTextW
+#else
+#define ddrCenterText ddrCenterTextA
+#endif
