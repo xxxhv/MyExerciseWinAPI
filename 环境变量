@@ -1,0 +1,58 @@
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+DWORD WINAPI EnumEnvironmentVar()
+{
+	//读取所有的环境变量
+	PVOID pEv = GetEnvironmentStrings();
+	LPTSTR szEnvs;//指针
+
+	for (szEnvs = (LPTSTR)pEv; *szEnvs;)
+	{
+		wprintf(L"%s\n", szEnvs);
+		while (*szEnvs++);
+	}
+	FreeEnvironmentStrings((LPWCH)pEv);//释放
+	return 0;
+}
+
+int main(int argc, LPTSTR argv[])
+{
+	if (0 == lstrcmp(L"showall", argv[1]) && argc == 2)
+	{
+		EnumEnvironmentVar();
+	}
+	else if (0 == lstrcmp(L"addnew", argv[1]) && argc == 2)
+	{
+		//添加
+		if (!SetEnvironmentVariable(TEXT("B"), TEXT("big")))
+		{
+			printf("error %d\n",GetLastError());
+		}
+		EnumEnvironmentVar();
+	}
+	else if (0 == lstrcmp(L"delete", argv[1]) && argc == 2)
+	{
+		//删除
+		if (!SetEnvironmentVariable(TEXT("B"), NULL))
+		{
+			printf("error %d\n", GetLastError());
+		}
+		EnumEnvironmentVar();
+	}
+	else if (0 == lstrcmp(L"set", argv[1]) && argc == 2)
+	{
+		//改
+		if (!SetEnvironmentVariable(TEXT("B"), TEXT("bill")))
+		{
+			printf("error %d\n", GetLastError());
+		}
+		EnumEnvironmentVar();
+	}
+
+	system("pause");
+	return 0;
+}
+
