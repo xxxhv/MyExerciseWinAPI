@@ -1,0 +1,29 @@
+
+#include <stdio.h>
+#include <windows.h>
+#include <TlHelp32.h>//工具帮助函数
+
+using namespace std;
+
+
+
+int main(int argc, LPTSTR argv[])
+{
+	PROCESSENTRY32 processEntry = { 0 };
+
+	HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);//创建工具帮助快照
+	if (hProcessSnap == INVALID_HANDLE_VALUE) return -1;
+
+	processEntry.dwSize = sizeof(PROCESSENTRY32);//设置大小
+	BOOL bRe = Process32First(hProcessSnap, &processEntry);//查找第一个进程
+	while (bRe)
+	{
+		wprintf(L" ProcessId %d (%s)\n", processEntry.th32ProcessID, processEntry.szExeFile);
+		bRe = Process32Next(hProcessSnap, &processEntry);//next
+	}
+	CloseHandle(hProcessSnap);
+	system("pause");
+	return 0;
+}
+
+
