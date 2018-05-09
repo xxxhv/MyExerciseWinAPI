@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+
+#define FILE_PATH "c:\\lllog.txt"
+SERVICE_STATUS m_ServiceStatus;//服务的状态
+SERVICE_STATUS_HANDLE m_ServiceStatusHandle;
+void WINAPI ServiceMain(int argc, char* argv[]);
+void WINAPI ServiceCtrlHandler(DWORD Opcode);
+int WriteToLog(char* str);
+BOOL bRun = TRUE;
+
+//sc create ser binpath= c:\ser.exe
+int main(void)
+{
+	//创建服务分配表
+	//只有一个服务数组为2  最后为NULL
+	SERVICE_TABLE_ENTRY DispatchTable[2];
+	DispatchTable[0].lpServiceName = "ser";
+	DispatchTable[0].lpServiceProc = (LPSERVICE_MAIN_FUNCTION)ServiceMain;
+	DispatchTable[1].lpServiceName = NULL;
+	DispatchTable[1].lpServiceProc = NULL;
+
+	//注册主函数
+	StartServiceCtrlDispatcher(DispatchTable);
+
+	system("pause");
+	return 0;
+}
+
+void WINAPI ServiceMain(int argc, char* argv[])
+{
+	MEMORYSTATUS memstatus;
+	char str[100];
+	int availmb;
+	//设置服务的状态
+	m_ServiceStatus.dwServiceType = SERVICE_WIN32;
+	m_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
+	m_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_STOP;
+	m_ServiceStatus.dwWin32ExitCode = 0;
+	m_ServiceStatus.dwServiceSpecificExitCode = 0;
+	m_ServiceStatus.dwCheckPoint = 0;
+	m_ServiceStatus.dwWaitHint = 0;
+
+	//注册服务控制函数
+	m_ServiceStatusHandle = RegisterServiceCtrlHandler("ser", ServiceCtrlHandler);
+	if (m_ServiceStatusHandle == 0)
+	{
+		WriteToLog("m_ServiceStatusHandle failed");
+		return;
+	}
+	WriteToLog("m_ServiceStatusHandle success");
+	m_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
+	SetServiceStatus(m_ServiceStatusHandle, &m_ServiceStatus);
+	bRun = TRUE;
+
+	
+	memset(str, '\0', 100);
+	while (bRun)
+	{
+		GlobalMemoryStatus(&memstatus);
+		availmb = memstatus.dwAvailPhys / 1024 / 1024;
+		sprintf_s(str, 100, "available memory is %sMB", availmb);
+		WriteToLog(str);
+		Sleep(5000);
+	}
+	WriteToLog("Service stoping");
+}
+
+//服务控制函数
+void WINAPI ServiceCtrlHandler(DWORD Opcode)
+{
+	switch (Opcode)
+	{
+	case SERVICE_CONTROL_STOP:
+		bRun = FALSE;
+		m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+		break;
+	case SERVICE_CONTROL_SHUTDOWN:
+		bRun = FALSE;
+		m_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+		break;
+	default:
+		break;
+	}
+	SetServiceStatus(m_ServiceStatusHandle, &m_ServiceStatus);
+}
+
+int WriteToLog(char* str)
+{
+	FILE* pfile;
+	fopen_s(&pfile, FILE_PATH, "a+");
+	if (pfile == NULL)
+	{
+		return -1;
+	}
+	fprintf_s(pfile, "%s\n", str);
+	fclose(pfile);
+	return 0;
+}
