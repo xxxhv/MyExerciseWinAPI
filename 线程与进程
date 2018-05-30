@@ -1,0 +1,48 @@
+#include <windows.h>
+#include <iostream>
+
+using namespace std;
+
+UINT x = 0;
+DWORD WINAPI StartAddress1(LPVOID lpParameter)
+{
+	for (int i = 0; i < 10; i++,x++)
+	{
+		cout << "---  " << x << "  ---" << endl;
+		Sleep(1000);
+	}
+	//cout << "hello I am a very simple thread." << endl << "I an used to demonstrate thread creation." << endl;
+	return 0;
+}
+DWORD WINAPI StartAddress2(LPVOID lpParameter)
+{
+	for (int i = 0; i < 10; i++,x++)
+	{
+		cout << "***  " << x << "  ***" << endl;
+		Sleep(500);
+	}
+	return 0;
+}
+
+int main(int argc, CHAR* argv[])
+{
+	//创建线程
+	HANDLE hThread1 = CreateThread(NULL, 0, StartAddress1, NULL, 0, NULL);
+	HANDLE hThread2 = CreateThread(NULL, 0, StartAddress2, NULL, 0, NULL);
+	//创建进程
+	STARTUPINFO startupInfo = { 0 };
+	PROCESS_INFORMATION processInfomation = { 0 };
+	
+#ifdef _DEBUG
+	BOOL bSuccess = CreateProcess(TEXT("..//Debug//tmpProcess.exe"), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfomation);
+#else
+	BOOL bSuccess = CreateProcess(TEXT("..//Release//tmpProcess.exe"), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfomation);
+#endif
+	//WaitForSingleObject函数用来检测hHandle事件的信号状态，在某一线程中调用该函数时，线程暂时挂起，如果在挂起的dwMilliseconds毫秒内，线程所等待的对象变为有信号状态，
+	//则该函数立即返回；如果超时时间已经到达dwMilliseconds毫秒，但hHandle所指向的对象还没有变成有信号状态，函数照样返回。
+	WaitForSingleObject(hThread1, INFINITE);
+	WaitForSingleObject(hThread2, INFINITE);
+	CloseHandle(hThread1);
+	CloseHandle(hThread2);
+	return system("pause");
+}
