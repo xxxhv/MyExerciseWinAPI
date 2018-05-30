@@ -19,7 +19,7 @@ int main(int argc, LPTSTR argv[])
 	
 	STARTUPINFO startupInfo = { 0 };
 	PROCESS_INFORMATION processInfoemation = { 0 };
-
+	//创建进程
 	BOOL bSuccess = CreateProcess(TEXT("C:\\Windows\\notepad.exe"), NULL, NULL, NULL, FALSE, NULL, NULL, NULL, &startupInfo, &processInfoemation);
 	if (bSuccess)
 	{
@@ -35,6 +35,7 @@ int main(int argc, LPTSTR argv[])
 			QEURYINFORMATIONPROCESS QueryInformationProcess = (QEURYINFORMATIONPROCESS)GetProcAddress(hDll, "NtQueryInformationProcess");
 			if (QueryInformationProcess)
 			{
+				//查询进程信息
 				NTSTATUS ntStatus = QueryInformationProcess(processInfoemation.hProcess, PROCESSINFOCLASS::ProcessBasicInformation, &pbi, sizeof(pbi), &uLength);
 				if (NT_SUCCESS(ntStatus))
 				{
