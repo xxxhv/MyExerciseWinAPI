@@ -1,0 +1,38 @@
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+
+
+
+int main()
+{
+	string filename;
+
+	cout << "enter name for new file:  ";
+	cin >> filename;
+
+	ofstream fout(filename.c_str()); 
+	//c_str()函数返回一个指向正规C字符串的指针, 内容与本string串相同  
+	//给ofstream ifstream 构造函数提供一个c风格的字符串参数
+	fout << "ddddddddddddddd!\n";
+	cout << "Enter your secret number:  ";
+	float secret;
+	cin >> secret;
+	fout << "Your secret number is " << secret << endl;
+	fout.close();
+
+	ifstream fin(filename.c_str());
+	cout << "Here are the contents of " << filename << ":\n";
+	char ch;
+	while (fin.get(ch))
+	{
+		cout << ch;
+	}
+	cout << "Done\n";
+	fin.close();
+
+	return system("pause");
+}
