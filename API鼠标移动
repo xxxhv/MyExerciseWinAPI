@@ -1,0 +1,126 @@
+#include <windows.h>
+#include <windowsx.h>
+#include <tchar.h>
+#include <commctrl.h>
+
+#pragma comment (lib,"comctl32.lib")
+//win7窗口
+#ifdef _UNICODE  
+#if defined _M_IX86  
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")  
+#elif defined _M_X64  
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")  
+#else  
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")  
+#endif  
+#endif  
+#define BUTTON_MSG 100
+#define BUTTON_CLOSE 101
+#define LABEL_TEXT 102
+
+LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+int WINAPI _tWinMain(HINSTANCE hThis,HINSTANCE hPrev,LPTSTR szCommandLine,int iWndShow)
+{
+	UNREFERENCED_PARAMETER(hPrev);
+	UNREFERENCED_PARAMETER(szCommandLine);//避免编译器关于未引用参数的警告
+
+	TCHAR* szWindowClass = _T("__basic_MPI_wnd_class__");
+
+	WNDCLASSEX wcx = { 0 };
+
+	wcx.cbClsExtra = 0;                                                             //实例化窗口 类   后分配额外字节
+	wcx.cbSize = sizeof(WNDCLASSEX);                                                //窗口结构大小
+	wcx.cbWndExtra = 0;                                                             //实例化窗口 实例 后分配额外字节
+	wcx.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);                                 //背景画刷句柄
+	wcx.hCursor = LoadCursor(NULL, IDC_ARROW);                                      //光标句柄
+	wcx.hIcon = LoadIcon(wcx.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));          //图标句柄
+	wcx.hIconSm = LoadIcon(wcx.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+	wcx.hInstance = hThis;                                                          //包含窗口过程的实例句柄
+	wcx.lpfnWndProc = WindowProcedure;                                              //指向窗口过程指针
+	wcx.lpszClassName = szWindowClass;
+	wcx.lpszMenuName = NULL;
+	wcx.style = CS_HREDRAW | CS_VREDRAW;                                            //长宽发生变化重绘
+
+	if (!RegisterClassEx(&wcx))         //注册窗口类
+	{
+		return 1;
+	}
+
+	InitCommonControls();
+
+	HWND hwnd = CreateWindow(szWindowClass, _T("Basic Message Passing Interface"), WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX, 200, 200, 440, 340, (HWND)NULL, (HMENU)NULL, wcx.hInstance, (LPVOID)NULL);
+	if (!hwnd)
+	{
+		return NULL;
+	}
+	
+	//创建一种有特殊性的逻辑字体
+	HFONT hFont = CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, BALTIC_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Microsoft Sans Serif"));
+	//创建窗口
+	HWND hButtonMsg = CreateWindow(_T("BUTTON"), _T("Show msg"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 310, 260, 100, 25, hwnd, (HMENU)BUTTON_MSG, wcx.hInstance, NULL);
+	HWND hButtonClose = CreateWindow(_T("BUTTON"), _T("Close me"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 310, 260, 100, 25, hwnd, (HMENU)BUTTON_CLOSE, wcx.hInstance, NULL);
+	HWND hText = CreateWindow(_T("STATIC"), NULL, WS_CHILD | WS_VISIBLE | SS_LEFT | WS_BORDER, 15, 20, 390, 220, hwnd, (HMENU)LABEL_TEXT, wcx.hInstance, NULL);
+
+	SendMessage(hButtonMsg, WM_SETFONT, (WPARAM)hFont, TRUE);
+	SendMessage(hButtonClose, WM_SETFONT, (WPARAM)hFont, TRUE);
+	SendMessage(hText, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+	UpdateWindow(hwnd);
+	ShowWindow(hwnd, SW_SHOW);
+
+	MSG msg = { 0 };
+	while (GetMessage(&msg, 0, 0, 0))//进入消息循环
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	UnregisterClass(wcx.lpszClassName, wcx.hInstance);
+	return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wParam))
+		{
+		case BUTTON_MSG:
+		{
+			MessageBox(hWnd, _T("Hello"), _T("Basic MPI"), MB_OK | MB_TOPMOST);
+			break;
+		}
+		case BUTTON_CLOSE:
+		{
+			PostMessage(hWnd, WM_CLOSE,0,0);
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	
+	case WM_MOUSEMOVE:
+	{
+		int xp = GET_X_LPARAM(lParam);
+		int yp = GET_Y_LPARAM(lParam);
+
+		TCHAR szBuffer[4096];
+		wsprintf(szBuffer, L"\n\n\t%ws\t%d\n\t%ws\t%d", L"Cursor X position:", xp, L"Cursor Y position:", yp);
+		HWND hText = GetDlgItem(hWnd, LABEL_TEXT);
+		SetWindowText(hText, szBuffer);
+		break;
+	}
+
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		break;
+	}
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);//不需要的消息转给windows
+	}
+	return 0;
+}
