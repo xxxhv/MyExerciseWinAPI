@@ -1,0 +1,58 @@
+#include <windows.h>
+#include <stdio.h>
+
+#define MEM_BLOCK_SIZE 32
+
+BOOL ShowMemContent(LPVOID lp, SIZE_T dwSize)
+{
+	BYTE lpShow[MEM_BLOCK_SIZE];
+	int i = 0;
+
+	if (dwSize > MEM_BLOCK_SIZE)
+	{
+		printf("over-flow\n");
+		return FALSE;
+	}
+	CopyMemory((LPVOID)lpShow, lp, dwSize);
+	for (; i < dwSize; i++)
+	{
+		printf("%.2X ", lpShow[i]);
+		if (!((i + 1) % 16))
+		{
+			printf("\n");
+		}
+	}
+	printf("\n");
+}
+
+int main()
+{
+	HANDLE hHeap = GetProcessHeap();
+	LPVOID lpm1, lpm2;
+
+	//lpm1 指针操作32字节内存
+	lpm1 = HeapAlloc(hHeap, 0, MEM_BLOCK_SIZE);
+	ShowMemContent(lpm1, MEM_BLOCK_SIZE);
+
+	//清零的内存块
+	lpm2 = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, MEM_BLOCK_SIZE);
+	ShowMemContent(lpm2, MEM_BLOCK_SIZE);
+
+	//清空
+	ZeroMemory(lpm1, MEM_BLOCK_SIZE);
+	ShowMemContent(lpm1, MEM_BLOCK_SIZE);
+
+	//填充
+	FillMemory(lpm2, MEM_BLOCK_SIZE, 0x0f);
+	ShowMemContent(lpm2, MEM_BLOCK_SIZE);
+
+	//拷贝
+	CopyMemory(lpm1, lpm2, MEM_BLOCK_SIZE);
+	ShowMemContent(lpm1, MEM_BLOCK_SIZE);
+	ShowMemContent(lpm2, MEM_BLOCK_SIZE);
+
+	HeapFree(hHeap, 0, lpm1);
+	HeapFree(hHeap, 0, lpm2);
+	system("pause");
+	return 0;
+}
