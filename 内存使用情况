@@ -1,0 +1,27 @@
+#include <windows.h>
+#include <stdio.h>
+
+
+
+int main()
+{
+	MEMORYSTATUSEX mem;//内存 结构
+	mem.dwLength = sizeof(mem);
+
+	GlobalMemoryStatusEx(&mem);
+	printf("全部物理内存  %I64u字节\n", mem.ullTotalPhys);
+	printf("可用物理内存  %I64u字节\n", mem.ullAvailPhys);
+	printf("全部虚拟内存  %I64u字节\n", mem.ullTotalVirtual);
+	printf("可用虚拟内存  %I64u字节\n", mem.ullAvailVirtual);
+	printf("全部页面文件  %I64u字节\n", mem.ullTotalPageFile);
+	printf("可用页面文件  %I64u字节\n", mem.ullAvailPageFile);
+
+	printf("全部物理内存  %I64uG\n", mem.ullTotalPhys / 1024 / 1024 / 1024);
+	printf("可用物理内存  %I64uG\n", mem.ullAvailPhys / 1024 / 1024 / 1024);
+	printf("全部虚拟内存  %I64uG\n", mem.ullTotalVirtual / 1024 / 1024 / 1024);
+	printf("可用虚拟内存  %I64uG\n", mem.ullAvailVirtual / 1024 / 1024 / 1024);
+	printf("全部页面文件  %I64uG\n", mem.ullTotalPageFile / 1024 / 1024 / 1024);
+	printf("可用页面文件  %I64uG\n", mem.ullAvailPageFile / 1024 / 1024 / 1024);
+	system("pause");
+	return 0;
+}
