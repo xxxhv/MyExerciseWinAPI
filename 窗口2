@@ -69,7 +69,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		//ExitThread(0);
 		return 0;
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);//不需要的消息转给windows
