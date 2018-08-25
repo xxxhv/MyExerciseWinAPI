@@ -1,0 +1,145 @@
+// st1.cpp: 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <windows.h>
+#include <windowsx.h>
+
+int ScreenWidth, ScreenHeight;
+#define BUTTON_1 100
+#define BUTTON_2 101
+#define LABEL_TEXT 102
+
+void OnP(HDC gdc)
+{
+	HDC ncDC;
+	ncDC = CreateCompatibleDC(gdc);//内存DC和窗口DC兼容
+	HBITMAP HMenDC = CreateCompatibleBitmap(gdc, 500, 500);//创建一张纸
+	SelectObject(ncDC, HMenDC);//位图给内存DC
+
+	Rectangle(ncDC, 0, 0, 500, 500);
+
+
+	BitBlt(gdc, 0, 0, 500, 500, ncDC, 0, 0, SRCCOPY);
+	DeleteObject(HMenDC);
+	DeleteDC(ncDC);
+}
+
+LRESULT CALLBACK Melter(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	HDC gdc;
+	PAINTSTRUCT ps;
+	
+
+	switch (Msg)
+	{
+	case WM_CREATE:
+	{
+		
+		break;
+	}
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wParam))
+		{
+		case BUTTON_1:
+		{
+			MessageBox(hWnd, _T("BUTTON"), _T("我是按钮1"), MB_OK | MB_TOPMOST);
+			break;
+		}
+		case BUTTON_2:
+		{
+			PostMessage(hWnd, WM_CLOSE, 0, 0);
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	case WM_KEYDOWN:
+	{
+		
+		switch (wParam)
+		{
+		case VK_RETURN:
+		{
+			MessageBox(NULL, L"我是一个窗口", L"^_^", MB_OK);
+			
+			break;
+		}
+		default:
+			break;
+		}
+		break;
+	}
+	case WM_MOUSEMOVE:
+	{
+		int xp = GET_X_LPARAM(lParam);
+		int yp = GET_Y_LPARAM(lParam);
+
+		TCHAR szBuffer[4096];
+		wsprintf(szBuffer, L"\n\n\t%ws\t%d\n\t%ws\t%d", L"Cursor X position:", xp, L"Cursor Y position:", yp);
+		HWND hText = GetDlgItem(hWnd, LABEL_TEXT);
+		SetWindowText(hText, szBuffer);
+		break;
+	}
+	case WM_PAINT:
+	{
+		gdc = BeginPaint(hWnd, &ps);
+		OnP(gdc);
+		EndPaint(hWnd, &ps);
+		break;
+	}
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		break;
+	}
+	return 0;
+	}
+	return DefWindowProc(hWnd, Msg, wParam, lParam);
+}
+
+int APIENTRY wWinMain(HINSTANCE hInstance,
+	HINSTANCE hPrevInstance,
+	LPTSTR lpCmdLine,
+	int nCmdShow)
+{
+	WNDCLASS wndClass = { 0,Melter,0,0,hInstance,0,LoadCursor(0,IDC_ARROW),0,0,L"ScreenMelter" };
+	
+	
+
+	if (!RegisterClass(&wndClass))
+	{
+		return -1;
+	}
+	HWND hwnd = CreateWindow(wndClass.lpszClassName, TEXT("0.0"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, (HWND)NULL, (HMENU)NULL, hInstance, (LPVOID)NULL);
+	if (!hwnd)
+	{
+		return 111;
+	}
+	/////////////////////////////////////////////////////////////////////////////////
+	//创建一种有特殊性的逻辑字体
+	HFONT hFont = CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, BALTIC_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_MODERN, _T("Microsoft Sans Serif"));
+	//创建窗口
+	HWND hButton1   = CreateWindow(_T("BUTTON"), _T("Button 1"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 180, 260, 100, 25, hwnd, (HMENU)BUTTON_1, wndClass.hInstance, NULL);
+	HWND hButton2   = CreateWindow(_T("BUTTON"), _T("Button 2"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 310, 260, 100, 25, hwnd, (HMENU)BUTTON_2, wndClass.hInstance, NULL);
+	HWND mytext     = CreateWindow(_T("STATIC"), NULL, WS_CHILD | WS_VISIBLE,                                        15, 20, 390, 220, hwnd,  (HMENU)LABEL_TEXT, wndClass.hInstance, NULL);
+	SendMessage(hButton1, WM_SETFONT, (WPARAM)hFont, TRUE);
+	SendMessage(hButton2, WM_SETFONT, (WPARAM)hFont, TRUE);
+	SendMessage(mytext, WM_SETFONT, (WPARAM)hFont, TRUE);
+	/////////////////////////////////////////////////////////////////////////////////
+	UpdateWindow(hwnd);
+	ShowWindow(hwnd, nCmdShow);
+	MSG msg = { 0 };
+	while (GetMessage(&msg, NULL, NULL, NULL))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	DestroyWindow(hwnd);
+	UnregisterClass(wndClass.lpszClassName, hInstance);
+
+	return (int)msg.wParam;
+}
+
